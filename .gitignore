@@ -1,0 +1,6 @@
+node_modules/
+dist/
+*.db
+
+# Claude Code local project settings (machine-specific permission grants)
+.claude/

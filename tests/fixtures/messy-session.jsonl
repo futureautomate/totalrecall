@@ -1,0 +1,4 @@
+{"type":"unknown-future-type","payload":{"deep":true},"sessionId":"bbb-222"}
+this line is not json at all {{{
+{"type":"user","message":{"role":"user","content":"hello from messy session"},"uuid":"u1","timestamp":"2026-08-02T09:00:00.000Z","cwd":"D:\\Projects\\demo2","sessionId":"bbb-222"}
+{"type":"assistant","message":{"role":"assistant","model":"claude-sonnet-5","content":[{"type":"tool_use","id":"t9","name":"Write","input":{"file_path":"D:\\Projects\\demo2\\a.txt","content":"x"}}]},"uuid":"a1","timestamp":"2026-08-02T09:00:20.000Z","cwd":"D:\\Projects\\demo2","sessionId":"bbb-222"}

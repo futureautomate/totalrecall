@@ -1,0 +1,28 @@
+{
+  "name": "sessiontrack",
+  "version": "0.1.0",
+  "description": "Machine-wide Claude Code session knowledge base: index, search, MCP",
+  "type": "module",
+  "bin": {
+    "sessiontrack": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/cli.ts",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "better-sqlite3": "^12.11.1",
+    "commander": "^15.0.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^9.6.0",
+    "@types/node": "^26.2.0",
+    "tsx": "^4.23.12",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.10"
+  }
+}

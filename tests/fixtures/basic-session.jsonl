@@ -1,0 +1,7 @@
+{"type":"mode","mode":"normal","sessionId":"aaa-111"}
+{"type":"ai-title","aiTitle":"Fix login bug","sessionId":"aaa-111"}
+{"type":"user","isMeta":true,"message":{"role":"user","content":"<local-command-caveat>caveat text</local-command-caveat>"},"uuid":"u0","timestamp":"2026-08-01T10:00:00.000Z","cwd":"D:\\Projects\\demo","sessionId":"aaa-111","gitBranch":"main","version":"2.1.229"}
+{"type":"user","message":{"role":"user","content":"The login page throws a 500 when the password has a quote in it"},"uuid":"u1","timestamp":"2026-08-01T10:00:05.000Z","cwd":"D:\\Projects\\demo","sessionId":"aaa-111","gitBranch":"main","version":"2.1.229"}
+{"type":"assistant","message":{"role":"assistant","model":"claude-fable-5","content":[{"type":"text","text":"I'll look at the login handler."},{"type":"tool_use","id":"t1","name":"Edit","input":{"file_path":"D:\\Projects\\demo\\src\\login.ts","old_string":"a","new_string":"b"}}]},"uuid":"a1","timestamp":"2026-08-01T10:00:10.000Z","cwd":"D:\\Projects\\demo","sessionId":"aaa-111","gitBranch":"main"}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","tool_use_id":"t1","content":"ok"}]},"uuid":"u2","timestamp":"2026-08-01T10:00:12.000Z","cwd":"D:\\Projects\\demo","sessionId":"aaa-111","gitBranch":"main"}
+{"type":"assistant","message":{"role":"assistant","model":"claude-fable-5","content":[{"type":"text","text":"Fixed: the SQL string was unescaped. Escaping added."}]},"uuid":"a2","timestamp":"2026-08-01T10:01:00.000Z","cwd":"D:\\Projects\\demo","sessionId":"aaa-111","gitBranch":"main"}
