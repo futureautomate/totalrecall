@@ -89,4 +89,19 @@ describe("UI API", () => {
     expect(r.status).toBe(404);
     expect(r.body.error).toBeDefined();
   });
+  it("malformed percent-encoding in a param segment doesn't crash the server", async () => {
+    const r = await fetch(base + "/api/sessions/%zz");
+    expect([400, 404]).toContain(r.status);
+    const body = await r.json();
+    expect(body.error).toBeDefined();
+    // the server process must still be alive and answering afterward
+    const follow = await get("/api/status");
+    expect(follow.status).toBe(200);
+  });
+  it("search rows match the list-row shape: digestStatus present, no rank leak", async () => {
+    const { body } = await get("/api/sessions?q=caddy");
+    expect(body.rows.length).toBeGreaterThan(0);
+    expect(body.rows[0]).toHaveProperty("digestStatus");
+    expect(body.rows[0]).not.toHaveProperty("rank");
+  });
 });

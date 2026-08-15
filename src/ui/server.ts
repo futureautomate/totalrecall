@@ -26,19 +26,34 @@ export function createUiServer(store: SessionStore, opts: { staticDir?: string }
   const staticDir = opts.staticDir ?? defaultStaticDir();
 
   return http.createServer(async (req, res) => {
-    if (await router.handle(req, res)) return;
-    const url = new URL(req.url ?? "/", "http://localhost");
-    if (url.pathname.startsWith("/api/")) return sendJson(res, 404, { error: "not found" });
-    // static with SPA fallback
-    const rel = url.pathname === "/" ? "index.html" : url.pathname.slice(1);
-    const file = path.resolve(staticDir, rel);
-    if (!file.startsWith(path.resolve(staticDir))) return sendJson(res, 403, { error: "forbidden" });
-    const target = fs.existsSync(file) && fs.statSync(file).isFile() ? file : path.join(staticDir, "index.html");
-    if (!fs.existsSync(target)) {
-      return sendJson(res, 503, { error: "UI bundle not built. Run `npm run build` (needs dist/ui-static)." });
+    try {
+      if (await router.handle(req, res)) return;
+      const url = new URL(req.url ?? "/", "http://localhost");
+      if (url.pathname.startsWith("/api/")) return sendJson(res, 404, { error: "not found" });
+      // static with SPA fallback
+      const rel = url.pathname === "/" ? "index.html" : url.pathname.slice(1);
+      const file = path.resolve(staticDir, rel);
+      if (!file.startsWith(path.resolve(staticDir))) return sendJson(res, 403, { error: "forbidden" });
+      const target = fs.existsSync(file) && fs.statSync(file).isFile() ? file : path.join(staticDir, "index.html");
+      if (!fs.existsSync(target)) {
+        return sendJson(res, 503, { error: "UI bundle not built. Run `npm run build` (needs dist/ui-static)." });
+      }
+      const stream = fs.createReadStream(target);
+      // Defer headers until the file actually opens, so a race (ENOENT,
+      // permission error, AV lock on Windows) between the existsSync check
+      // above and the real read can still be reported as a clean error
+      // instead of a half-written 200 response.
+      stream.on("open", () => {
+        res.writeHead(200, { "content-type": MIME[path.extname(target)] ?? "application/octet-stream" });
+      });
+      stream.on("error", () => {
+        if (!res.headersSent) sendJson(res, 500, { error: "failed to read file" });
+        else res.destroy();
+      });
+      stream.pipe(res);
+    } catch (e) {
+      if (!res.headersSent) sendJson(res, 500, { error: String((e as Error)?.message ?? e) });
     }
-    res.writeHead(200, { "content-type": MIME[path.extname(target)] ?? "application/octet-stream" });
-    fs.createReadStream(target).pipe(res);
   });
 }
 

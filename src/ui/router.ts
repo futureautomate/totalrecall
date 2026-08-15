@@ -28,11 +28,16 @@ export class Router {
       if (r.segments.length !== parts.length) continue;
       const params: Record<string, string> = {};
       let ok = true;
+      let badEncoding = false;
       for (let i = 0; i < parts.length; i++) {
         const seg = r.segments[i];
-        if (seg.startsWith(":")) params[seg.slice(1)] = decodeURIComponent(parts[i]);
+        if (seg.startsWith(":")) {
+          try { params[seg.slice(1)] = decodeURIComponent(parts[i]); }
+          catch { badEncoding = true; ok = false; break; }
+        }
         else if (seg !== parts[i]) { ok = false; break; }
       }
+      if (badEncoding) { sendJson(res, 400, { error: "bad request" }); return true; }
       if (!ok) continue;
       try {
         await r.handler(req, res, params, url);

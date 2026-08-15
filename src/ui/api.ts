@@ -32,8 +32,13 @@ export function registerApi(router: Router, store: SessionStore): void {
     const q = url.searchParams.get("q")?.trim();
     if (q) {
       const hits = store.searchSessions(q, { project: f.project, limit });
-      // Search results are already compact; enrich minimally for the list view.
-      const rows = hits.map(h => ({ ...h, aiTitle: null, snippet: h.snippet }));
+      // Normalize to the same row shape /api/sessions (list mode) returns,
+      // so callers don't need to branch on `mode` to read a row.
+      const rows = hits.map(h => ({
+        sessionId: h.sessionId, projectPath: h.projectPath, title: h.title,
+        aiTitle: null, firstPrompt: null, startedAt: h.startedAt,
+        outcome: h.outcome, digestStatus: null, snippet: h.snippet,
+      }));
       return sendJson(res, 200, { rows, total: rows.length, mode: "search" });
     }
     const { rows, total } = store.listSessions({ ...f, limit, offset });
