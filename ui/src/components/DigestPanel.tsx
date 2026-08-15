@@ -34,7 +34,9 @@ export default function DigestPanel({ sessionId, onClose, onNavigate, onTopic }:
           <a href="#" onClick={e => { e.preventDefault(); onNavigate(r.sessionId); }}>{r.title ?? r.sessionId}</a> <span className="muted">— {r.reason}</span></li>)}</ul></>}
         <h4>Search raw transcript</h4>
         <div className="row"><input className="input" placeholder="term to find in the transcript" value={q} onChange={e => setQ(e.target.value)} />
-          <button className="btn" onClick={() => api.excerpt(sessionId, q).then(r => setSnips(r.snippets)).catch(e => setErr(e.message))} disabled={!q.trim()}>Find</button></div>
+          <button className="btn" onClick={() => api.excerpt(sessionId, q).then(r => {
+            if (r.error) { setErr(r.error); setSnips(null); } else { setErr(null); setSnips(r.snippets); }
+          }).catch(e => setErr(e.message))} disabled={!q.trim()}>Find</button></div>
         {snips && (snips.length === 0 ? <p className="muted">No matches.</p> :
           <ul style={{ fontSize: 13 }}>{snips.map((s, i) => <li key={i}><pre style={{ whiteSpace: "pre-wrap" }}>{s}</pre></li>)}</ul>)}
       </>}

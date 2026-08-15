@@ -16,6 +16,7 @@ export default function SessionsPage() {
   const [total, setTotal] = useState(0);
   const [selected, setSelected] = useState<string | null>(sp.get("session"));
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
   const reqId = useRef(0);
@@ -28,6 +29,20 @@ export default function SessionsPage() {
       .catch(e => { if (id === reqId.current) setErr(e.message); })
       .finally(() => { if (id === reqId.current) setLoading(false); });
   }, [dq, filters]);
+
+  function loadMore() {
+    // Snapshot the request id (rather than bumping it) so this "append" fetch
+    // is guarded by the same query/filters the primary effect is currently on:
+    // if the user changes the query/filters before this resolves, reqId.current
+    // will have moved on and the stale page must be dropped.
+    const id = reqId.current;
+    const offset = rows.length;
+    setLoadingMore(true);
+    api.sessions({ ...filters, q: dq || undefined, limit: 100, offset })
+      .then(r => { if (id === reqId.current) setRows(prev => [...prev, ...r.rows]); })
+      .catch(e => { if (id === reqId.current) setErr(e.message); })
+      .finally(() => { if (id === reqId.current) setLoadingMore(false); });
+  }
   useEffect(() => {
     const next = new URLSearchParams(); if (dq) next.set("q", dq); if (filters.project) next.set("project", filters.project);
     if (selected) next.set("session", selected); setSp(next, { replace: true });
@@ -45,8 +60,19 @@ export default function SessionsPage() {
       ) : (
         <div style={{ display: "grid", gridTemplateColumns: selected ? "1fr 420px" : "1fr", gap: 16 }}>
           <div>
-            <p className="muted" style={{ fontSize: 13 }}>{loading ? "Loading…" : `${total} session${total === 1 ? "" : "s"}${dq ? " matching" : ""}`}</p>
+            <p className="muted" style={{ fontSize: 13 }}>
+              {loading ? "Loading…" : rows.length < total
+                ? `showing ${rows.length} of ${total}${dq ? " matching" : ""}`
+                : `${total} session${total === 1 ? "" : "s"}${dq ? " matching" : ""}`}
+            </p>
             <SessionList rows={rows} selected={selected} onSelect={setSelected} />
+            {!loading && rows.length < total && (
+              <div style={{ textAlign: "center", marginTop: 12 }}>
+                <button className="btn" onClick={loadMore} disabled={loadingMore}>
+                  {loadingMore ? "Loading…" : "Load more"}
+                </button>
+              </div>
+            )}
           </div>
           <DigestPanel sessionId={selected} onClose={() => setSelected(null)} onNavigate={setSelected}
             onTopic={t => { setQ(t); }} />

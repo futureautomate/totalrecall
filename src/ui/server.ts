@@ -14,10 +14,38 @@ const MIME: Record<string, string> = {
   ".png": "image/png", ".ico": "image/x-icon", ".woff2": "font/woff2", ".map": "application/json",
 };
 
-/** dist/ui-static next to the compiled server file: dist/ui/server.js -> dist/ui-static/ ... */
+/**
+ * dist/ui-static next to the compiled server file: dist/ui/server.js -> dist/ui-static/ ...
+ * Under `tsx` (dev/no-build runs), this file lives at src/ui/server.ts instead, where
+ * `../ui-static` resolves to the nonexistent src/ui-static. Try the dist-relative
+ * layout first, then fall back to the repo-root dist/ui-static so `tsx src/cli.ts ui`
+ * can still serve an already-built bundle.
+ */
 export function defaultStaticDir(): string {
   const here = path.dirname(fileURLToPath(import.meta.url));      // .../dist/ui  (or src/ui under tsx)
-  return path.resolve(here, "..", "ui-static");                    // .../dist/ui-static
+  const candidates = [
+    path.resolve(here, "..", "ui-static"),                         // .../dist/ui-static
+    path.resolve(here, "..", "..", "dist", "ui-static"),            // .../src/ui -> <root>/dist/ui-static
+  ];
+  for (const c of candidates) if (fs.existsSync(c)) return c;
+  return candidates[0];
+}
+
+/** Hostname part of a Host header, stripped of port; bracketed IPv6 literals unwrapped. */
+function hostnameFrom(hostHeader: string): string {
+  if (hostHeader.startsWith("[")) {
+    const end = hostHeader.indexOf("]");
+    return end === -1 ? hostHeader : hostHeader.slice(1, end);
+  }
+  const idx = hostHeader.lastIndexOf(":");
+  return idx === -1 ? hostHeader : hostHeader.slice(0, idx);
+}
+
+const ALLOWED_HOSTS = new Set(["127.0.0.1", "localhost", "::1"]);
+
+/** DNS-rebinding guard: reject requests whose Host header doesn't name this local server. */
+function isAllowedHost(hostHeader: string): boolean {
+  return ALLOWED_HOSTS.has(hostnameFrom(hostHeader));
 }
 
 export function createUiServer(store: SessionStore, opts: { staticDir?: string } = {}): http.Server {
@@ -27,6 +55,10 @@ export function createUiServer(store: SessionStore, opts: { staticDir?: string }
 
   return http.createServer(async (req, res) => {
     try {
+      const hostHeader = req.headers.host;
+      if (hostHeader && !isAllowedHost(hostHeader)) {
+        return sendJson(res, 403, { error: "forbidden host" });
+      }
       if (await router.handle(req, res)) return;
       const url = new URL(req.url ?? "/", "http://localhost");
       if (url.pathname.startsWith("/api/")) return sendJson(res, 404, { error: "not found" });

@@ -8,6 +8,7 @@
   },
   "files": ["dist", "README.md", "docs/GUIDE.md", "docs/LEARNING.md"],
   "scripts": {
+    "prepack": "npm run build",
     "build": "tsc && tsc -p ui/tsconfig.json --noEmit && vite build --config ui/vite.config.ts",
     "build:server": "tsc",
     "dev": "tsx src/cli.ts",

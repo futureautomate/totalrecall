@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import path from "node:path";
 import { Command } from "commander";
 import { SessionStore } from "./store.js";

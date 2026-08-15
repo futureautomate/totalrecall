@@ -6,7 +6,8 @@ export default function SessionList({ rows, selected, onSelect }:
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
       {rows.map(r => (
-        <div key={r.sessionId} className="card" onClick={() => onSelect(r.sessionId)}
+        <div key={r.sessionId} className="card" role="button" tabIndex={0} onClick={() => onSelect(r.sessionId)}
+          onKeyDown={e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onSelect(r.sessionId); } }}
           style={{ cursor: "pointer", borderColor: selected === r.sessionId ? "var(--accent)" : undefined }}>
           <div className="row" style={{ justifyContent: "space-between" }}>
             <strong>{r.title ?? r.aiTitle ?? r.firstPrompt ?? r.sessionId}</strong>

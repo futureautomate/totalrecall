@@ -101,10 +101,14 @@ nothing to keep in sync with the CLI's own read paths.
 `dist/ui-static` (the Vite bundle) is a separate output directory from
 `dist/ui` (the compiled `server.ts`/`router.ts`/`api.ts`) because `tsc`
 and `vite build` are two different compilers writing two different kinds
-of output into one `dist/` tree; `defaultStaticDir()` walks from the
-compiled server's own location (`dist/ui/`) up to `dist/ui-static/` at
-runtime rather than hardcoding a path, so the layout survives from source
-(`tsx`) and from `dist` (`node`) alike. In dev, `npm run dev:ui` runs
+of output into one `dist/` tree; `defaultStaticDir()` (`src/ui/server.ts`)
+resolves its own file location at runtime and tries two candidates in
+order: `<here>/../ui-static` (correct when running compiled `dist/ui/server.js`,
+where `<here>` is `dist/ui`) and `<here>/../../dist/ui-static` (correct when
+running `src/ui/server.ts` directly under `tsx`, where `<here>` is `src/ui`
+and there's no `src/ui-static` to find). It returns the first candidate that
+exists on disk, so both entry points serve the same already-built bundle. In
+dev, `npm run dev:ui` runs
 Vite's own server on 5173 with `/api` proxied to a `totalrecall ui`
 already running on 4747 (`ui/vite.config.ts`) — two processes only in
 development, one in production.

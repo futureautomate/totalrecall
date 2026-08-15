@@ -165,18 +165,19 @@ export class SessionStore {
       .all(limit).map((r) => rowFrom(this.db, r));
   }
 
-  searchSessions(query: string, opts: { project?: string; limit?: number } = {}): SearchResult[] {
+  searchSessions(query: string, opts: SessionFilters & { limit?: number } = {}): SearchResult[] {
     const limit = opts.limit ?? 10;
     const fts = sanitizeFtsQuery(query);
+    const fc = filterClause("s");
     const rows: any[] = this.db.prepare(`
       SELECT s.session_id, s.project_path, s.digest_title, s.started_at, s.outcome,
              snippet(session_fts, 2, '>>', '<<', ' … ', 24) AS snip,
              bm25(session_fts) AS rank
       FROM session_fts JOIN sessions s ON s.session_id = session_fts.session_id
-      WHERE session_fts MATCH ?
-        AND (@project IS NULL OR instr(LOWER(s.project_path), LOWER(@project)) > 0)
+      WHERE session_fts MATCH @fts
+        AND ${fc.sql}
       ORDER BY rank LIMIT @limit
-    `).all(fts, { project: opts.project ?? null, limit });
+    `).all({ fts, ...fc.params(opts), limit });
     return rows.map(r => ({
       sessionId: r.session_id, projectPath: r.project_path, title: r.digest_title,
       snippet: r.snip ?? "", startedAt: r.started_at, outcome: r.outcome, rank: r.rank,

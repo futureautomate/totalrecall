@@ -59,6 +59,19 @@ describe("search & graph", () => {
     expect(related.map(r => r.sessionId)).toContain("deploy1");
   });
 
+  // Important #1: searchSessions must apply the same outcome/from/to filters
+  // as listSessions/graphData, not just `project` — the UI's search box and
+  // the filter bar act on the same result set.
+  it("narrows results by outcome filter", () => {
+    store.upsertSession(meta("auth2", { filesEdited: ["D:\\demo\\auth2.ts"] }));
+    store.setDigest("auth2", digest({
+      title: "JWT bug still open", summary: "Still investigating a jwt refresh bug.",
+      topics: ["auth", "jwt"], outcome: "ongoing",
+    }));
+    const hits = store.searchSessions("jwt", { outcome: "ongoing" });
+    expect(hits.map(h => h.sessionId)).toEqual(["auth2"]);
+  });
+
   it("sanitizeFtsQuery quotes every token", () => {
     expect(sanitizeFtsQuery('jwt auth')).toBe('"jwt" OR "auth"');
   });

@@ -31,7 +31,7 @@ export function registerApi(router: Router, store: SessionStore): void {
     const offset = intParam(url, "offset", 0, 1_000_000);
     const q = url.searchParams.get("q")?.trim();
     if (q) {
-      const hits = store.searchSessions(q, { project: f.project, limit });
+      const hits = store.searchSessions(q, { ...f, limit });
       // Normalize to the same row shape /api/sessions (list mode) returns,
       // so callers don't need to branch on `mode` to read a row.
       const rows = hits.map(h => ({

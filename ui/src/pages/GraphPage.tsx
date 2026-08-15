@@ -96,7 +96,12 @@ export default function GraphPage() {
           <div ref={ref} style={{ position: "absolute", inset: 0 }} />
           {empty && <div className="empty" style={{ position: "absolute", inset: 0 }}><p>Nothing to draw yet.</p><p>Digested sessions carry topics — run <code>totalrecall backfill</code> or clear the filters.</p></div>}
         </div>
-        <DigestPanel sessionId={selected} onClose={() => setSelected(null)} onNavigate={id => { setSelected(id); cyRef.current?.$id(id).select(); }} onTopic={() => {}} />
+        <DigestPanel sessionId={selected} onClose={() => setSelected(null)} onNavigate={id => { setSelected(id); cyRef.current?.$id(id).select(); }}
+          onTopic={t => {
+            const cy = cyRef.current; if (!cy) return;
+            const n = cy.$id("topic:" + t);
+            if (n.nonempty()) { cy.elements().addClass("faded"); n.closedNeighborhood().removeClass("faded"); }
+          }} />
       </div>
     </div>
   );

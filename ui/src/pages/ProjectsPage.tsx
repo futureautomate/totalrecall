@@ -20,7 +20,9 @@ export default function ProjectsPage() {
         <tbody>{rows.map(p => {
           const pct = p.sessionCount ? Math.round((p.digested / p.sessionCount) * 100) : 0;
           return (
-            <tr key={p.projectPath} onClick={() => nav(`/sessions?project=${encodeURIComponent(p.projectPath)}`)}
+            <tr key={p.projectPath} role="button" tabIndex={0}
+              onClick={() => nav(`/sessions?project=${encodeURIComponent(p.projectPath)}`)}
+              onKeyDown={e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); nav(`/sessions?project=${encodeURIComponent(p.projectPath)}`); } }}
               style={{ cursor: "pointer", borderTop: "1px solid var(--border)" }}>
               <td style={{ padding: 10 }} title={p.projectPath}><strong>{shortPath(p.projectPath)}</strong><div className="muted" style={{ fontSize: 12 }}>{p.projectPath}</div></td>
               <td>{p.sessionCount}</td>
