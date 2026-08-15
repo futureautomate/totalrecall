@@ -48,6 +48,35 @@ Any Claude session on this machine can use the `totalrecall` MCP tools. Just ask
 Typical flow when starting fresh on something you did before:
 **search → read digest → only then excerpt.** That order is what saves tokens.
 
+### Web UI
+
+```
+node dist/cli.js ui                  # http://127.0.0.1:4747
+node dist/cli.js ui --port 4848      # different port
+node dist/cli.js ui --no-open        # don't launch a browser
+```
+
+Read-only, bound to `127.0.0.1` — nothing beyond your machine can reach
+it. Needs a build first (`npm run build`); the UI is served from the
+compiled `dist/ui-static`, not `src/`.
+
+Three pages, reachable from the nav bar:
+
+- **Sessions** — search or browse with filters (project, outcome, date
+  range). Click a row to open its digest panel: summary, decisions,
+  topics, files touched, related sessions. Raw transcript text isn't
+  loaded until you click "Search raw transcript" inside a session — the
+  rest of the UI runs off the digest, not the full transcript.
+- **Graph** — sessions clustered around the topics they touch, colored by
+  project. Toggle project nodes on/off, click a session to expand the
+  files it edited (click again to collapse), click a topic to highlight
+  its neighborhood, "Re-layout" to re-run the layout.
+- **Projects** — every indexed project with a digest-coverage bar and top
+  topics; click a project to jump to Sessions pre-filtered to it.
+
+The status bar at the top always shows session/project counts, percent
+digested, and a hint if anything's still pending.
+
 ### Ending sessions = automatic indexing
 
 Nothing to do. The SessionEnd hook indexes and digests each session when it ends
@@ -99,9 +128,16 @@ Delete `~/.totalrecall/index.db`, then `npx tsx src/cli.ts backfill`. Nothing el
 **Uninstall**
 Remove the SessionEnd block from `~/.claude/settings.json`, run `claude mcp remove totalrecall`, delete `~/.totalrecall/`.
 
+**UI shows "bundle not built"**
+Run `npm run build` — the UI server serves `dist/ui-static`, which only
+exists after a build. `npm run dev:ui` (Vite dev server) works without a
+build too, but proxies `/api` to a running `totalrecall ui` on port 4747.
+
+**UI port in use**
+`node dist/cli.js ui --port 4848` (or any other free port).
+
 ## Not built yet (planned)
 
-- `totalrecall ui` — local web app (Sessions / Graph / Projects)
 - `totalrecall export neo4j` — graph exploration with Cypher
 
 ---

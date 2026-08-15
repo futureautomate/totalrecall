@@ -77,6 +77,27 @@ During development you can run commands directly against the source with
   session whose transcript just closed. Not meant to be run manually;
   the `marker` argument is only an idempotency check `install-hook` uses
   to detect whether its own entry is already present.
+- **`totalrecall ui [--port <n>] [--no-open]`** — start the local web UI
+  and open it in your browser (default `http://127.0.0.1:4747`). `--port`
+  picks a different port; `--no-open` skips launching a browser.
+
+## Web UI
+
+`totalrecall ui` serves a small read-only app over your indexed sessions,
+bound to `127.0.0.1` only — nothing is exposed beyond your machine. Three
+pages:
+
+- **Sessions** — search and browse, with filters (project, outcome, date
+  range) and a digest panel (summary, decisions, topics, files, related
+  sessions). Raw transcript excerpts are fetched on demand, not preloaded.
+- **Graph** — sessions clustered around the topics they touch, colored by
+  project, with a project-node toggle. Click a session to expand the files
+  it edited; click a topic to highlight its neighborhood.
+- **Projects** — a table of every indexed project with a digest-coverage
+  bar and top topics; clicking a project filters the Sessions page.
+
+The UI needs a build first: `npm run build` compiles the server and
+bundles the frontend into `dist/ui-static`.
 
 ## How the hook works
 
@@ -95,6 +116,6 @@ a Claude Code session.
 ## Status
 
 Core pipeline (parse → digest → store → search → MCP → hook) is built
-and tested (unit + integration tests via `vitest`, see `tests/`). A web
-UI and an optional Neo4j graph export are designed (see the spec) but
-not yet built.
+and tested (unit + integration tests via `vitest`, see `tests/`). The
+local web UI (`totalrecall ui`) is built. An optional Neo4j graph export
+is still planned.
