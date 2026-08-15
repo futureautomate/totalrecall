@@ -12,10 +12,8 @@ re-reading raw transcripts.
 commands with examples, MCP usage from live sessions, maintenance, and
 troubleshooting.
 
-See `docs/superpowers/specs/2026-08-13-sessiontrack-design.md` (the
-project's original working name) for the
-full design (architecture, decisions, edge cases, build phases) and
-`docs/LEARNING.md` for notes on how the pieces work, written while
+See `docs/LEARNING.md` for notes on how the pieces work (session file
+anatomy, the SQLite/FTS5 index, what MCP is on the wire), written while
 building this.
 
 ## How it works, briefly
