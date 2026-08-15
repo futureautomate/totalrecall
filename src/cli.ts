@@ -147,4 +147,19 @@ program.command("install-hook")
     console.log("Run 'npm run build' after code changes; the hook runs dist/cli.js.");
   });
 
+program.command("ui")
+  .description("Open the local web UI (sessions, graph, projects)")
+  .option("--port <n>", "port to listen on", "4747")
+  .option("--no-open", "don't open the browser automatically")
+  .action(async (opts) => {
+    const { startUi } = await import("./ui/server.js");
+    try {
+      const { url } = await startUi({ port: parseInt(opts.port, 10), open: opts.open });
+      console.log(`TotalRecall UI → ${url}   (Ctrl-C to stop)`);
+    } catch (e) {
+      console.error(String((e as Error).message ?? e));
+      process.exit(1);
+    }
+  });
+
 program.parseAsync();
