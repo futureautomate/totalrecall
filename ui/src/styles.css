@@ -1,0 +1,26 @@
+:root { --bg:#0f1115; --panel:#171a21; --border:#262a33; --text:#e6e8ee; --muted:#9aa3b2;
+  --accent:#7c9cff; --accent-2:#3ddc97; --danger:#ff6b6b; --warn:#ffb454; --radius:10px;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+[data-theme="light"] { --bg:#f7f8fa; --panel:#ffffff; --border:#e2e5ea; --text:#1b1f27; --muted:#5b6474; }
+* { box-sizing: border-box; } html, body, #root { height: 100%; margin: 0; }
+body { background: var(--bg); color: var(--text); }
+.shell { display: grid; grid-template-columns: 220px 1fr; grid-template-rows: 1fr auto; height: 100%; }
+.nav { grid-row: 1 / span 2; background: var(--panel); border-right: 1px solid var(--border); padding: 16px; display: flex; flex-direction: column; gap: 6px; }
+.nav .brand { font-weight: 700; font-size: 18px; margin-bottom: 12px; letter-spacing: .3px; }
+.nav a { color: var(--muted); text-decoration: none; padding: 8px 10px; border-radius: 8px; }
+.nav a.active, .nav a:hover { color: var(--text); background: rgba(124,156,255,.12); }
+.main { overflow: auto; padding: 20px 24px; }
+.status { grid-column: 2; border-top: 1px solid var(--border); background: var(--panel); padding: 8px 16px; font-size: 13px; color: var(--muted); display: flex; gap: 18px; align-items: center; }
+.status code { color: var(--text); background: rgba(255,255,255,.06); padding: 1px 6px; border-radius: 6px; }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 12px; border: 1px solid var(--border); color: var(--muted); }
+.badge.completed { color: var(--accent-2); border-color: var(--accent-2); }
+.badge.ongoing { color: var(--warn); border-color: var(--warn); }
+.badge.abandoned { color: var(--danger); border-color: var(--danger); }
+.btn { background: transparent; color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; cursor: pointer; }
+.btn:hover { border-color: var(--accent); }
+.input { background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; width: 100%; }
+.card { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; }
+.muted { color: var(--muted); } .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+mark { background: rgba(124,156,255,.35); color: inherit; border-radius: 3px; padding: 0 2px; }
+.empty { text-align: center; color: var(--muted); padding: 60px 20px; }
+.empty code { color: var(--text); }

@@ -1,15 +1,19 @@
 {
   "name": "totalrecall",
   "version": "0.1.0",
-  "description": "Machine-wide Claude Code session knowledge base: index, search, MCP",
+  "description": "Machine-wide Claude Code session knowledge base: index, search, MCP server, web UI",
   "type": "module",
   "bin": {
     "totalrecall": "./dist/cli.js"
   },
+  "files": ["dist", "README.md", "docs/GUIDE.md", "docs/LEARNING.md"],
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && vite build --config ui/vite.config.ts",
+    "build:server": "tsc",
     "dev": "tsx src/cli.ts",
+    "dev:ui": "vite --config ui/vite.config.ts",
     "test": "vitest run",
+    "test:ui": "vitest run --config ui/vitest.config.ts",
     "test:watch": "vitest"
   },
   "dependencies": {
@@ -19,10 +23,22 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/react": "^16.3.2",
     "@types/better-sqlite3": "^9.6.0",
+    "@types/cytoscape": "^3.31.0",
     "@types/node": "^26.2.0",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "@vitejs/plugin-react": "^6.0.5",
+    "cytoscape": "^3.34.1",
+    "jsdom": "^30.0.1",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "react-router-dom": "^7.18.2",
     "tsx": "^4.23.12",
     "typescript": "^7.0.2",
+    "vite": "^8.2.1",
     "vitest": "^4.1.10"
   }
 }
