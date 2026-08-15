@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { api, type Filters, type ProjectStat, type SessionListRow } from "../api";
 import { useDebounce } from "../hooks/useDebounce";
@@ -18,15 +18,20 @@ export default function SessionsPage() {
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
 
+  const reqId = useRef(0);
   useEffect(() => { api.projects().then(setProjects).catch(() => {}); }, []);
   useEffect(() => {
+    const id = ++reqId.current;
     setLoading(true); setErr(null);
     api.sessions({ ...filters, q: dq || undefined, limit: 100 })
-      .then(r => { setRows(r.rows); setTotal(r.total); })
-      .catch(e => setErr(e.message)).finally(() => setLoading(false));
+      .then(r => { if (id === reqId.current) { setRows(r.rows); setTotal(r.total); } })
+      .catch(e => { if (id === reqId.current) setErr(e.message); })
+      .finally(() => { if (id === reqId.current) setLoading(false); });
+  }, [dq, filters]);
+  useEffect(() => {
     const next = new URLSearchParams(); if (dq) next.set("q", dq); if (filters.project) next.set("project", filters.project);
     if (selected) next.set("session", selected); setSp(next, { replace: true });
-  }, [dq, filters, selected]);
+  }, [dq, filters.project, selected]);
 
   const emptyDb = !loading && !dq && !filters.project && !filters.outcome && !filters.from && !filters.to && total === 0;
   return (
