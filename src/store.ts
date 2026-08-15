@@ -12,6 +12,28 @@ export interface SessionRow {
   topics: string[]; filesEdited: string[];
 }
 
+export interface SessionFilters { project?: string; outcome?: string; from?: string; to?: string; }
+export interface GraphNode {
+  id: string; type: "session" | "topic" | "project"; label: string;
+  project?: string; outcome?: string | null; messageCount?: number; startedAt?: string | null;
+}
+export interface GraphEdge { source: string; target: string; kind: "about" | "in_project"; }
+
+// Shared WHERE fragment for the UI read methods. Every filter is optional;
+// null params make the clause a no-op. `from`/`to` compare ISO strings, which
+// is correct for ISO-8601 timestamps.
+function filterClause(alias = "s"): { sql: string; params: (f: SessionFilters) => Record<string, unknown> } {
+  return {
+    sql: `
+      (@project IS NULL OR instr(LOWER(${alias}.project_path), LOWER(@project)) > 0)
+      AND (@outcome IS NULL OR ${alias}.outcome = @outcome)
+      AND (@from IS NULL OR ${alias}.started_at >= @from)
+      AND (@to IS NULL OR ${alias}.started_at <= @to)`,
+    params: (f) => ({ project: f.project ?? null, outcome: f.outcome ?? null,
+      from: f.from ?? null, to: f.to ? f.to + "T99" : null }),
+  };
+}
+
 function rowFrom(db: Database.Database, r: any): SessionRow {
   const topics = db.prepare("SELECT topic FROM session_topics WHERE session_id = ? ORDER BY rowid")
     .all(r.session_id).map((t: any) => t.topic);
@@ -218,6 +240,71 @@ export class SessionStore {
       budget--;
     }
     return [...out.values()];
+  }
+
+  listSessions(f: SessionFilters & { limit?: number; offset?: number } = {}): { rows: SessionRow[]; total: number } {
+    const fc = filterClause();
+    const params = fc.params(f);
+    const total = (this.db.prepare(`SELECT COUNT(*) AS n FROM sessions s WHERE ${fc.sql}`)
+      .get(params) as any).n as number;
+    const rows = this.db.prepare(`
+      SELECT * FROM sessions s WHERE ${fc.sql}
+      ORDER BY s.started_at DESC, s.session_id LIMIT @limit OFFSET @offset
+    `).all({ ...params, limit: f.limit ?? 50, offset: f.offset ?? 0 })
+      .map((r) => rowFrom(this.db, r));
+    return { rows, total };
+  }
+
+  projectStats(): { projectPath: string; sessionCount: number; lastActivity: string | null;
+                    digested: number; pending: number; failed: number; topTopics: string[] }[] {
+    const rows: any[] = this.db.prepare(`
+      SELECT project_path AS projectPath, COUNT(*) AS sessionCount, MAX(ended_at) AS lastActivity,
+        SUM(CASE WHEN digest_status = 'done' THEN 1 ELSE 0 END) AS digested,
+        SUM(CASE WHEN digest_status IN ('pending','skipped') THEN 1 ELSE 0 END) AS pending,
+        SUM(CASE WHEN digest_status = 'failed' THEN 1 ELSE 0 END) AS failed
+      FROM sessions GROUP BY project_path ORDER BY lastActivity DESC
+    `).all();
+    const topTopicsStmt = this.db.prepare(`
+      SELECT st.topic, COUNT(*) AS n FROM session_topics st
+      JOIN sessions s ON s.session_id = st.session_id
+      WHERE s.project_path = ? GROUP BY st.topic ORDER BY n DESC, st.topic LIMIT 3
+    `);
+    return rows.map(r => ({ ...r, topTopics: topTopicsStmt.all(r.projectPath).map((t: any) => t.topic) }));
+  }
+
+  graphData(f: SessionFilters = {}): { nodes: GraphNode[]; edges: GraphEdge[] } {
+    const fc = filterClause();
+    const params = fc.params(f);
+    const sessions: any[] = this.db.prepare(`
+      SELECT session_id, project_path, digest_title, ai_title, first_prompt, outcome,
+             message_count, started_at FROM sessions s WHERE ${fc.sql}
+    `).all(params);
+    const nodes: GraphNode[] = [];
+    const edges: GraphEdge[] = [];
+    const projects = new Set<string>();
+    const topics = new Set<string>();
+    for (const s of sessions) {
+      nodes.push({
+        id: s.session_id, type: "session",
+        label: s.digest_title ?? s.ai_title ?? (s.first_prompt ?? s.session_id).slice(0, 60),
+        project: s.project_path, outcome: s.outcome, messageCount: s.message_count, startedAt: s.started_at,
+      });
+      projects.add(s.project_path);
+      edges.push({ source: s.session_id, target: `project:${s.project_path}`, kind: "in_project" });
+    }
+    if (sessions.length > 0) {
+      const ids = sessions.map(s => s.session_id);
+      const placeholders = ids.map(() => "?").join(",");
+      const links: any[] = this.db.prepare(
+        `SELECT session_id, topic FROM session_topics WHERE session_id IN (${placeholders})`).all(...ids);
+      for (const l of links) {
+        topics.add(l.topic);
+        edges.push({ source: l.session_id, target: `topic:${l.topic}`, kind: "about" });
+      }
+    }
+    for (const p of projects) nodes.push({ id: `project:${p}`, type: "project", label: p });
+    for (const t of topics) nodes.push({ id: `topic:${t}`, type: "topic", label: t });
+    return { nodes, edges };
   }
 
   close(): void { this.db.close(); }
