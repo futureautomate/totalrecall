@@ -31,7 +31,7 @@ export function makeClaudeRunner(
   opts: { model?: string; timeoutMs?: number } = {},
 ): ClaudeRunner {
   const model = opts.model ?? "claude-haiku-4-5";
-  const envTimeout = Number(process.env.SESSIONTRACK_DIGEST_TIMEOUT_MS);
+  const envTimeout = Number(process.env.TOTALRECALL_DIGEST_TIMEOUT_MS);
   const timeoutMs = opts.timeoutMs
     ?? (Number.isFinite(envTimeout) && envTimeout > 0 ? envTimeout : 180_000);
   const mcpConfigPath = emptyMcpConfigPath();
@@ -46,7 +46,7 @@ export function makeClaudeRunner(
         // Marks any process tree spawned from this run (including a hook
         // firing off the digester's own SessionEnd) so hook-run can refuse
         // to re-index/re-digest it — breaks the self-sustaining chain.
-        env: { ...process.env, SESSIONTRACK_DIGESTER: "1" },
+        env: { ...process.env, TOTALRECALL_DIGESTER: "1" },
       });
       let out = "", err = "";
       const timer = setTimeout(() => {

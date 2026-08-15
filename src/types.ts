@@ -1,6 +1,6 @@
 export interface SessionMeta {
   sessionId: string;
-  projectPath: string;      // decoded real path, e.g. D:\Projects\sessiontrack
+  projectPath: string;      // decoded real path, e.g. D:\Projects\totalrecall
   filePath: string;         // absolute path to the .jsonl
   startedAt: string | null; // ISO timestamp
   endedAt: string | null;

@@ -6,7 +6,7 @@ import { makeClaudeRunner } from "./claude-runner.js";
 import { indexSessionFile, backfill, scanSessionFiles } from "./indexer.js";
 
 const program = new Command();
-program.name("sessiontrack").description("Claude Code session knowledge base");
+program.name("totalrecall").description("Claude Code session knowledge base");
 
 // --timeout is given in seconds on the CLI; makeClaudeRunner wants ms.
 function timeoutOpt(opts: { timeout?: string }): { timeoutMs?: number } {
@@ -78,7 +78,7 @@ program.command("digest-pending")
   });
 
 program.command("mcp")
-  .description("Run the sessiontrack MCP server on stdio")
+  .description("Run the totalrecall MCP server on stdio")
   .action(async () => {
     const { StdioServerTransport } = await import("@modelcontextprotocol/sdk/server/stdio.js");
     const { buildMcpServer } = await import("./mcp.js");
@@ -96,7 +96,7 @@ program.command("hook-run")
       // this env var; a SessionEnd hook firing for the digester's own headless
       // run must not re-index/re-digest itself — that's the self-sustaining
       // claude -p chain this guard exists to break.
-      if (process.env.SESSIONTRACK_DIGESTER === "1") { process.exit(0); return; }
+      if (process.env.TOTALRECALL_DIGESTER === "1") { process.exit(0); return; }
 
       let input = "";
       for await (const chunk of process.stdin) input += chunk;

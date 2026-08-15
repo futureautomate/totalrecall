@@ -8,7 +8,7 @@ const asText = (data: unknown) => ({
 });
 
 export function buildMcpServer(store: SessionStore): McpServer {
-  const server = new McpServer({ name: "sessiontrack", version: "0.1.0" });
+  const server = new McpServer({ name: "totalrecall", version: "0.1.0" });
 
   server.registerTool("search_sessions", {
     description:

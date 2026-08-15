@@ -1,4 +1,4 @@
-# sessiontrack — Learning Notes
+# totalrecall — Learning Notes
 
 These notes exist to teach the concepts this project is built on, grounded
 in the actual code — not generic tutorials. Each chapter lands with the
@@ -10,8 +10,8 @@ Claude Code writes every session as JSONL (one JSON object per line) to
 `~/.claude/projects/<encoded-project-path>/<session-id>.jsonl`. The
 directory name is the project's real path with every character outside
 `[A-Za-z0-9-]` replaced by `-` (see `encodeProjectPath`,
-`src/paths.ts:27`) — `D:\Projects\sessiontrack` becomes something like
-`D--Projects-sessiontrack`.
+`src/paths.ts:27`) — `D:\Projects\totalrecall` becomes something like
+`D--Projects-totalrecall`.
 
 Lines come in many types — on this machine we've seen `user`, `assistant`,
 `attachment`, `file-history-snapshot`, `system`, `last-prompt`,
@@ -35,7 +35,7 @@ has grown new line types over time, and it will keep doing so.
 
 ## 2. How our SQLite index works
 
-Everything lives in one file, `~/.sessiontrack/index.db` (`dbPath`,
+Everything lives in one file, `~/.totalrecall/index.db` (`dbPath`,
 `src/paths.ts:15`), opened in WAL mode with a 5-second busy timeout
 (`src/db.ts:5-6`). WAL mode matters because the SessionEnd hook writes to
 this file from a short-lived process while a `search` or an MCP query
@@ -72,7 +72,7 @@ A "tool" is just a typed function the server advertises to the model:
 a name, a description, and an input schema. We build ours with the
 official SDK's `McpServer` and `registerTool`, describing inputs with zod
 schemas that the SDK turns into JSON Schema for the wire protocol
-(`src/mcp.ts:10-53`). sessiontrack exposes five: `search_sessions`,
+(`src/mcp.ts:10-53`). totalrecall exposes five: `search_sessions`,
 `get_session_digest`, `get_session_excerpt`, `related_sessions`, and
 `list_projects`. Every tool handler returns the same shape — a
 `content: [{ type: "text", text: ... }]` array, here a JSON string

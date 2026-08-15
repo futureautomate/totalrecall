@@ -1,10 +1,10 @@
 {
-  "name": "sessiontrack",
+  "name": "totalrecall",
   "version": "0.1.0",
   "description": "Machine-wide Claude Code session knowledge base: index, search, MCP",
   "type": "module",
   "bin": {
-    "sessiontrack": "./dist/cli.js"
+    "totalrecall": "./dist/cli.js"
   },
   "scripts": {
     "build": "tsc",

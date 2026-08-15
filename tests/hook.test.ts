@@ -14,7 +14,7 @@ function tempSettings(content: object | null): string {
 describe("installHook", () => {
   it("adds a SessionEnd hook to empty settings", () => {
     const p = tempSettings({});
-    const r = installHook(p, "D:\\Projects\\sessiontrack\\dist\\cli.js");
+    const r = installHook(p, "D:\\Projects\\totalrecall\\dist\\cli.js");
     expect(r.installed).toBe(true);
     const s = JSON.parse(fs.readFileSync(p, "utf8"));
     const cmd = s.hooks.SessionEnd[0].hooks[0].command;

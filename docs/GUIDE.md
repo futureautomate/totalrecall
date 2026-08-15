@@ -1,4 +1,4 @@
-# sessiontrack — User Guide
+# totalrecall — User Guide
 
 How to actually use the app day to day. (What it is and how it works internally: see [README](../README.md) and [LEARNING.md](LEARNING.md).)
 
@@ -8,7 +8,8 @@ How to actually use the app day to day. (What it is and how it works internally:
 
 ## Running commands
 
-All commands run from `D:\Projects\sessiontrack`. Two equivalent forms:
+All commands run from the project folder (locally `D:\Projects\sessiontrack` —
+the repo predates the TotalRecall name). Two equivalent forms:
 
 ```
 npx tsx src/cli.ts <command>     # runs TypeScript directly (dev)
@@ -37,7 +38,7 @@ a folder-name fragment as long as the folder name didn't change).
 
 ### Search from inside a Claude Code session (the main point of the app)
 
-Any Claude session on this machine can use the `sessiontrack` MCP tools. Just ask naturally:
+Any Claude session on this machine can use the `totalrecall` MCP tools. Just ask naturally:
 
 - *"Search my past sessions for the JWT auth work"* → `search_sessions`
 - *"Get the full digest of that session"* → `get_session_digest`
@@ -67,11 +68,11 @@ The currently-active session is never indexed (2-minute activity window).
 
 ## Where things live
 
-- **Database:** `~/.sessiontrack/index.db` (single SQLite file — this IS the knowledge base; back it up if you care)
-- **Digester scratch:** `~/.sessiontrack/digester-cwd/` (headless claude runs execute here; excluded from indexing — leave it alone)
+- **Database:** `~/.totalrecall/index.db` (single SQLite file — this IS the knowledge base; back it up if you care)
+- **Digester scratch:** `~/.totalrecall/digester-cwd/` (headless claude runs execute here; excluded from indexing — leave it alone)
 - **Session sources:** `~/.claude/projects/<encoded-path>/<session-id>.jsonl` (owned by Claude Code, read-only to us)
-- **Hook registration:** `~/.claude/settings.json` → `hooks.SessionEnd` (command contains the word `sessiontrack`)
-- **MCP registration:** user scope — check with `claude mcp list` (expect `sessiontrack … ✔ Connected`)
+- **Hook registration:** `~/.claude/settings.json` → `hooks.SessionEnd` (command contains the word `totalrecall`)
+- **MCP registration:** user scope — check with `claude mcp list` (expect `totalrecall … ✔ Connected`)
 
 ## Troubleshooting
 
@@ -80,29 +81,29 @@ The currently-active session is never indexed (2-minute activity window).
 2. `npx tsx src/cli.ts digest-pending` — it may have a failed digest. Huge
    transcripts are automatically condensed to head+tail before digesting; if a
    digest still times out, retry with `--timeout 600` (or set
-   `SESSIONTRACK_DIGEST_TIMEOUT_MS` for the hook/backfill default).
+   `TOTALRECALL_DIGEST_TIMEOUT_MS` for the hook/backfill default).
 3. Searching with a `project` filter? If the repo moved on disk, old sessions
    live under the old path — filter by folder name, or drop the filter.
 
 **MCP tools missing in a Claude session**
-- `claude mcp list` must show sessiontrack Connected. If not: `claude mcp add sessiontrack -s user -- node "D:\Projects\sessiontrack\dist\cli.js" mcp`
+- `claude mcp list` must show totalrecall Connected. If not: `claude mcp add totalrecall -s user -- node "D:\Projects\sessiontrack\dist\cli.js" mcp`
 - Sessions started *before* registration don't have the tools — start a new session.
 
 **Hook doesn't seem to index anything**
-- Check `~/.claude/settings.json` still has the SessionEnd entry (`hook-run sessiontrack`).
+- Check `~/.claude/settings.json` still has the SessionEnd entry (`hook-run totalrecall`).
 - Re-install safely (idempotent): `npm run build` then `npx tsx src/cli.ts install-hook`.
 - The hook never errors visibly by design (always exits 0) — test manually by running `digest-pending` and checking search.
 
 **Reset everything**
-Delete `~/.sessiontrack/index.db`, then `npx tsx src/cli.ts backfill`. Nothing else stores state.
+Delete `~/.totalrecall/index.db`, then `npx tsx src/cli.ts backfill`. Nothing else stores state.
 
 **Uninstall**
-Remove the SessionEnd block from `~/.claude/settings.json`, run `claude mcp remove sessiontrack`, delete `~/.sessiontrack/`.
+Remove the SessionEnd block from `~/.claude/settings.json`, run `claude mcp remove totalrecall`, delete `~/.totalrecall/`.
 
 ## Not built yet (planned)
 
-- `sessiontrack ui` — local web app (Sessions / Graph / Projects)
-- `sessiontrack export neo4j` — graph exploration with Cypher
+- `totalrecall ui` — local web app (Sessions / Graph / Projects)
+- `totalrecall export neo4j` — graph exploration with Cypher
 
 ---
 *Maintenance note: this guide is a living document — update it whenever commands,

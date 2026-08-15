@@ -7,7 +7,7 @@ export function claudeProjectsDir(): string {
 }
 
 export function dataDir(): string {
-  const d = path.join(os.homedir(), ".sessiontrack");
+  const d = path.join(os.homedir(), ".totalrecall");
   fs.mkdirSync(d, { recursive: true });
   return d;
 }
@@ -29,5 +29,5 @@ export function encodeProjectPath(realPath: string): string {
 }
 
 export function excludedProjectDirs(): Set<string> {
-  return new Set([encodeProjectPath(path.join(os.homedir(), ".sessiontrack", "digester-cwd"))]);
+  return new Set([encodeProjectPath(path.join(os.homedir(), ".totalrecall", "digester-cwd"))]);
 }

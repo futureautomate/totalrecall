@@ -5,14 +5,14 @@ import path from "node:path";
 
 describe("paths", () => {
   it("encodes a Windows path the way Claude Code does", () => {
-    expect(encodeProjectPath("D:\\Projects\\sessiontrack")).toBe("D--Projects-sessiontrack");
+    expect(encodeProjectPath("D:\\Projects\\totalrecall")).toBe("D--Projects-totalrecall");
     expect(encodeProjectPath("C:\\Users\\tejas")).toBe("C--Users-tejas");
   });
   it("claudeProjectsDir points into the home directory", () => {
     expect(claudeProjectsDir()).toBe(path.join(os.homedir(), ".claude", "projects"));
   });
   it("excludes the digester cwd from scanning", () => {
-    const digesterEncoded = encodeProjectPath(path.join(os.homedir(), ".sessiontrack", "digester-cwd"));
+    const digesterEncoded = encodeProjectPath(path.join(os.homedir(), ".totalrecall", "digester-cwd"));
     expect(excludedProjectDirs().has(digesterEncoded)).toBe(true);
   });
 });
