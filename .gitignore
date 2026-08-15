@@ -4,3 +4,6 @@ dist/
 
 # Claude Code local project settings (machine-specific permission grants)
 .claude/
+
+# Internal design specs / implementation plans (local-only; not for the public repo)
+docs/superpowers/
