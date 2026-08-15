@@ -8,13 +8,14 @@
   },
   "files": ["dist", "README.md", "docs/GUIDE.md", "docs/LEARNING.md"],
   "scripts": {
-    "build": "tsc && vite build --config ui/vite.config.ts",
+    "build": "tsc && tsc -p ui/tsconfig.json --noEmit && vite build --config ui/vite.config.ts",
     "build:server": "tsc",
     "dev": "tsx src/cli.ts",
     "dev:ui": "vite --config ui/vite.config.ts",
     "test": "vitest run",
     "test:ui": "vitest run --config ui/vitest.config.ts",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit && tsc -p ui/tsconfig.json --noEmit"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.30.0",

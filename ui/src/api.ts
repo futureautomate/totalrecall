@@ -11,9 +11,9 @@ async function getJson<T>(url: string): Promise<T> {
   if (!r.ok) { const b = await r.json().catch(() => ({})); throw new Error((b as any).error ?? `HTTP ${r.status}`); }
   return r.json() as Promise<T>;
 }
-const qs = (o: Record<string, unknown>) => {
+const qs = (o: object) => {
   const p = new URLSearchParams();
-  for (const [k, v] of Object.entries(o)) if (v !== undefined && v !== "" && v !== null) p.set(k, String(v));
+  for (const [k, v] of Object.entries(o as Record<string, unknown>)) if (v !== undefined && v !== "" && v !== null) p.set(k, String(v));
   const s = p.toString(); return s ? `?${s}` : "";
 };
 export const api = {
