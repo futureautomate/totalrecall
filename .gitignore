@@ -7,3 +7,6 @@ dist/
 
 # Internal design specs / implementation plans (local-only; not for the public repo)
 docs/superpowers/
+
+# SDD working dirs
+.superpowers/
