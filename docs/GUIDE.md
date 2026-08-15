@@ -8,8 +8,7 @@ How to actually use the app day to day. (What it is and how it works internally:
 
 ## Running commands
 
-All commands run from the project folder (locally `D:\Projects\sessiontrack` —
-the repo predates the TotalRecall name). Two equivalent forms:
+All commands run from the project folder (`D:\Projects\totalrecall`). Two equivalent forms:
 
 ```
 npx tsx src/cli.ts <command>     # runs TypeScript directly (dev)
@@ -86,7 +85,7 @@ The currently-active session is never indexed (2-minute activity window).
    live under the old path — filter by folder name, or drop the filter.
 
 **MCP tools missing in a Claude session**
-- `claude mcp list` must show totalrecall Connected. If not: `claude mcp add totalrecall -s user -- node "D:\Projects\sessiontrack\dist\cli.js" mcp`
+- `claude mcp list` must show totalrecall Connected. If not: `claude mcp add totalrecall -s user -- node "D:\Projects\totalrecall\dist\cli.js" mcp`
 - Sessions started *before* registration don't have the tools — start a new session.
 
 **Hook doesn't seem to index anything**
