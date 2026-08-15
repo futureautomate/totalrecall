@@ -28,7 +28,9 @@ export default function GraphPage() {
   const [selected, setSelected] = useState<string | null>(null);
   const [count, setCount] = useState({ nodes: 0, edges: 0 });
   const [empty, setEmpty] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
   const expanded = useRef(new Set<string>());
+  const reqId = useRef(0);
 
   useEffect(() => { api.projects().then(setProjects).catch(() => {}); }, []);
 
@@ -45,10 +47,14 @@ export default function GraphPage() {
         expanded.current.delete(id);
         return;
       }
-      const d = await api.session(id);
-      cy.add(fileElementsFor(d));
-      expanded.current.add(id);
-      cy.layout({ name: "cose", animate: true, animationDuration: 400, fit: false, randomize: false } as any).run();
+      try {
+        const d = await api.session(id);
+        cy.add(fileElementsFor(d));
+        expanded.current.add(id);
+        cy.layout({ name: "cose", animate: true, animationDuration: 400, fit: false, randomize: false } as any).run();
+      } catch (e: any) {
+        setErr(e.message);
+      }
     });
     cy.on("tap", "node.topic", (ev) => { const n = ev.target; cy.elements().addClass("faded"); n.closedNeighborhood().removeClass("faded"); });
     cy.on("tap", (ev) => { if (ev.target === cy) { cy.elements().removeClass("faded"); } });
@@ -57,7 +63,10 @@ export default function GraphPage() {
 
   useEffect(() => {
     const cy = cyRef.current; if (!cy) return;
+    const id = ++reqId.current;
+    setErr(null);
     api.graph(filters).then(g => {
+      if (id !== reqId.current) return;
       const nodes = showProjects ? g.nodes : g.nodes.filter(n => n.type !== "project");
       const edges = showProjects ? g.edges : g.edges.filter(e => e.kind !== "in_project");
       expanded.current.clear();
@@ -67,7 +76,7 @@ export default function GraphPage() {
       setEmpty(nodes.length === 0);
       cy.layout({ name: "cose", animate: false, nodeRepulsion: () => 8000, idealEdgeLength: () => 60, gravity: 0.6, numIter: 800 } as any).run();
       cy.fit(undefined, 30);
-    });
+    }).catch(e => { if (id === reqId.current) setErr(e.message); });
   }, [filters, showProjects]);
 
   return (
@@ -80,7 +89,8 @@ export default function GraphPage() {
           <span className="muted" style={{ fontSize: 13 }}>{count.nodes} nodes · {count.edges} edges</span>
         </div>
       </div>
-      <div><FilterBar value={filters} onChange={setFilters} projects={projects} /><GraphLegend /></div>
+      <div><FilterBar value={filters} onChange={setFilters} projects={projects} /><GraphLegend />
+        {err && <p className="muted">Error: {err}</p>}</div>
       <div style={{ display: "grid", gridTemplateColumns: selected ? "1fr 400px" : "1fr", gap: 12, minHeight: 0 }}>
         <div className="card" style={{ position: "relative", padding: 0, minHeight: 0 }}>
           <div ref={ref} style={{ position: "absolute", inset: 0 }} />
